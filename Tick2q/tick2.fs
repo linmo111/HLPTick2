@@ -224,18 +224,20 @@ module PartC =
 
         let checkBoundary (result : Result<{|IsAboveBoundary: bool; Uplift:float option|}, string>) =
             match result with
-            | Ok record when( record.IsAboveBoundary=false ) && (record.Uplift=None) -> true
-            | Ok record when( record.IsAboveBoundary=false ) && (record.Uplift<>None) -> false
-            | Ok _ -> true
-            | Error error -> true
+            | Ok record when(record.Uplift=None) -> false
+            | Ok record when(record.Uplift<>None) -> true
+            | Ok _ -> false
+            | Error _ -> false //if there are uplift available, then we are sure that that boundary can be reached, therefore we return true
 
-        let UpliftBoundary= List.tryFind(fun str -> not (checkBoundary (upliftFunc marks str course)) ) boundaries
-
+        let UpliftBoundary= List.tryFind(fun str ->  (checkBoundary (upliftFunc marks str course)) ) boundaries
+        //try finds the string in the boundaries list with a uplift availble, since there are only one, we can only find one.
 
         match UpliftBoundary with
             | None -> (classify course totalMarks)
             | Some string -> Ok (string)
             | _ -> Error ("unknown error")
+
+
         // Use upliftFunc and markTotal and classify.
         // Assume that the student can be within possible uplift range of at most one boundary.
         // Assume that classify is correct unless student is within uplift range of a given boundary,
@@ -246,7 +248,7 @@ module PartC =
             // Return Ok classname or an error if there is any error.
             // (option and error returns ignored in above comments, must be dealt with)
 
-        failwithf "Not implemented" // replace by your code ()
+        // failwithf "Not implemented" // replace by your code ()
 
 //------------------------------Simple test data and functions---------------------------------//
 module TestClassify =
